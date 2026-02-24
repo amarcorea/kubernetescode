@@ -1,8 +1,8 @@
 node {
-    // Las variables en Scripted Pipeline se declaran así:
-    def CALL_JOB_NAME = 'deployment-cd'
-    def DOCKER_IMAGE_NAME = 'amarcorea/appdeployment'
-    def DOCKERHuB_CREDS = 'dockerhubcreds'
+    // Definimos las variables como Strings explícitos
+    String imageName = 'amarcorea/appdeployment'
+    String dockerHubCreds = 'dockerhubcreds'
+    String targetJob = 'deployment-cd'
     def app
 
     stage('Clone repository') {
@@ -10,8 +10,8 @@ node {
     }
 
     stage('Build image') {
-        // Usamos interpolación con comillas dobles para la variable
-        app = docker.build("${DOCKER_IMAGE_NAME}")
+        // Usamos la variable directamente sin ${} para evitar errores de interpolación
+        app = docker.build(imageName)
     }
 
     stage('Test image') {
@@ -21,16 +21,13 @@ node {
     }
 
     stage('Push image') {
-        // El ID de las credenciales va directo o como variable
-        docker.withRegistry('https://registry.hub.docker.com', DOCKERHuB_CREDS) {
+        docker.withRegistry('https://registry.hub.docker.com', dockerHubCreds) {
+            // env.BUILD_NUMBER es una variable global, aseguramos que sea String
             app.push("${env.BUILD_NUMBER}")
-            app.push("latest") // Tip: Siempre es bueno tener un tag latest
         }
     }
-    
+
     stage('Trigger ManifestUpdate') {
-        echo "triggering Continuos deployment"
-        // Llamamos al otro job pasando el tag
-        build job: CALL_JOB_NAME, parameters: [string(name: 'DOCKERTAG', value: "${env.BUILD_NUMBER}")]
+        build job: targetJob, parameters: [string(name: 'DOCKERTAG', value: "${env.BUILD_NUMBER}")]
     }
 }

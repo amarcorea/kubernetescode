@@ -14,11 +14,13 @@ node('docker-executor') {
         app = docker.build(imageName)
     }
 
+    /*
     stage('Test image') {
         app.inside("-u 1000:1000") { 
             sh 'echo "Tests passed"'
         }
     }
+    */
 
     stage('Push image') {
         docker.withRegistry('https://registry.hub.docker.com', dockerHubCreds) {

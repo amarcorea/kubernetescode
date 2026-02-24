@@ -1,4 +1,4 @@
-node {
+node('docker-executor') {
     // Definimos las variables como Strings explícitos
     String imageName = 'amarcorea/appdeployment'
     String dockerHubCreds = 'dockerhubcreds'

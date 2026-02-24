@@ -15,7 +15,7 @@ node('docker-executor') {
     }
 
     stage('Test image') {
-        app.inside {
+        app.inside("-u ${sh(script: 'id -u', returnStdout: true).trim()}:${sh(script: 'id -g', returnStdout: true).trim()}") {
             sh 'echo "Tests passed"'
         }
     }

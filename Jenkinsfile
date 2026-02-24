@@ -32,7 +32,7 @@ node('docker-executor') {
         }
     
         stage('Trigger ManifestUpdate') {
-            build job: targetJob, parameters: [string(name: 'DOCKERTAG', value: "${env.BUILD_NUMBER}")]
+            build job: targetJob, parameters: [string(name: 'DOCKERIMAGE', value: imageName), string(name: 'DOCKERTAG', value: "${env.BUILD_NUMBER}")]
         }
     }
 }

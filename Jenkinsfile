@@ -1,6 +1,12 @@
 node {
     def app
 
+    environment{
+        CALL_JOB_NAME = 'deployment-cd'
+        DOCKER_IMAGE_NAME = 'amarcorea/appdeployment'
+        DOCKERHuB_CREDS = 'dockerhubcreds'
+    }
+
     stage('Clone repository') {
       
 
@@ -9,7 +15,7 @@ node {
 
     stage('Build image') {
   
-       app = docker.build("raj80dockerid/test")
+       app = docker.build('${DOCKER_IMAGE_NAME}')
     }
 
     stage('Test image') {
@@ -22,13 +28,13 @@ node {
 
     stage('Push image') {
         
-        docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
+        docker.withRegistry('https://registry.hub.docker.com', '${DOCKERHuB_CREDS}') {
             app.push("${env.BUILD_NUMBER}")
         }
     }
     
     stage('Trigger ManifestUpdate') {
-                echo "triggering updatemanifestjob"
-                build job: 'updatemanifest', parameters: [string(name: 'DOCKERTAG', value: env.BUILD_NUMBER)]
+                echo "triggering Continuos deployment"
+                build job: '${CALL_JOB_NAME}', parameters: [string(name: 'DOCKERTAG', value: env.BUILD_NUMBER)]
         }
 }
